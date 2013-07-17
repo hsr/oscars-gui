@@ -1,0 +1,9 @@
+id,hop,src,dst,color
+1,1,SEA,SFO,#f00
+1,2,SFO,DFW,#f00
+2,1,L22,L23,#f0f
+2,2,L23,L21,#f0f
+2,3,L21,JFK,#f0f
+2,4,JFK,ATL,#f0f
+3,1,DFW,DEN,#0ff
+3,2,DEN,ORD,#0ff

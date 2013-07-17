@@ -1,0 +1,17 @@
+origin,destination,count,type
+SEA,SFO,1,1
+SEA,DEN,1,1
+SFO,DFW,1,1
+DEN,ORD,1,1
+DEN,DFW,1,1
+DFW,ATL,1,1
+ATL,MCO,1,1
+MCO,JFK,1,1
+ORD,JFK,1,1
+ATL,JFK,1,1
+L21,L22,1,2
+L21,L23,1,2
+L22,L23,1,2
+L21,JFK,1,1
+
+
