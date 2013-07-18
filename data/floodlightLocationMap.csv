@@ -1,0 +1,12 @@
+dpid,type,name,city,state,country,latitude,longitude
+1,1,Seattle,Seattle,WA,USA,47.44898194,-122.3093131
+2,1,San Francisco,San Francisco,CA,USA,37.61900194,-122.3748433
+3,1,Denver,Denver,CO,USA,39.85840806,-104.6670019
+4,1,Dallas,Dallas-Fort Worth,TX,USA,32.89595056,-97.0372
+5,1,Atlanta,Atlanta,GA,USA,33.64044444,-84.42694444
+6,1,Chicago,Chicago,IL,USA,41.979595,-87.90446417
+7,1,Orlando,Orlando,FL,USA,28.42888889,-81.31602778
+8,1,New York,New York,NY,USA,40.63975111,-73.77892556
+9,2,New York L21,New York,NY,USA,41.63975111,-73.77892556
+a,2,New York L22,New York,NY,USA,42.63975111,-71.77892556
+b,2,New York L23,New York,NY,USA,42.03975111,-74.77892556
