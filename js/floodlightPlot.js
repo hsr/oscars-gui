@@ -31,7 +31,7 @@ d3.select("input[type=checkbox]").on("change", function() {
   cells.classed("voronoi", this.checked);
 });
 
-d3.json("us-states.json", function(collection) {
+d3.json("/data/us-states.json", function(collection) {
   states.selectAll("path")
       .data(collection.features)
     .enter().append("svg:path")
@@ -71,74 +71,112 @@ var arc = d3.geo.greatArc()
   });
 
 function parseFloodlightTopology() {
-	d3.json("data/floodlighttopo.json", function(topology) {
+	d3.json("/data/topology.json", function(topology) {
 
 		topology.forEach(function(topologyLink) {
 			var origin      = cleanDPID(topologyLink["src-switch"]),
 				destination = cleanDPID(topologyLink["dst-switch"]),
-				links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
+				sport       = topologyLink["src-port"],
+				dport       = topologyLink["dst-port"],
+				links       = linksByOrigin[origin] || (linksByOrigin[origin] = []);
 
 			links.push({
 				type: 'LINK',
 				source: origin,
-				target: destination
+				sport: sport,
+				target: destination,
+				tport: dport
 			});
-			//alert('pushing '+origin+' to '+destination)
-			countByDevice[origin] = (countByDevice[origin] || 0) + 1;
-			countByDevice[destination] = (countByDevice[destination] || 0) + 1;
+			
+			// Manually add bi-directional links
+			links = linksByOrigin[destination] || (linksByOrigin[destination] = []);
+			sport = topologyLink["dst-port"];
+			dport = topologyLink["src-port"];			
+			links.push({
+				type: 'LINK',
+				source: destination,
+				sport: sport,
+				target: origin,
+				tport: dport
+			});
+			
+			// countByDevice[origin] = (countByDevice[origin] || 0) + 1;
+			// countByDevice[destination] = (countByDevice[destination] || 0) + 1;
+			countByDevice[origin] = countByDevice[destination] = 2;
 		});
 	});
 }
 
 function drawFloodlightTopology() {
-	d3.csv("data/floodlightLocationMap.csv", function(netDevices) {
+	d3.csv("/data/floodlightLocationMap.csv", function(netDevices) {
 
-      // Only consider netDevices with at least one link.
-      netDevices = netDevices.filter(function(netDevice) {
-      	if (countByDevice[netDevice.dpid]) {
-      		var location = [+netDevice.longitude, + netDevice.latitude];
-      		locationByDevice[netDevice.dpid] = location;
-      		positions.push(projection(location));
-      		return true;
-      	}
-      });
-	
-      // Compute the Voronoi diagram of netDevices' projected positions.
-      polygons = d3.geom.voronoi(positions);
-	
-      var g = cells.selectAll("g")
-          .data(netDevices)
-        .enter().append("svg:g");
+		// Only consider netDevices with at least one link.
+		netDevices = netDevices.filter(function(netDevice) {
+			if (countByDevice[netDevice.dpid]) {
+				var location = [+netDevice.longitude, + netDevice.latitude];
+				locationByDevice[netDevice.dpid] = location;
+				positions.push(projection(location));
+				return true;
+			}
+		});
 
-      g.append("svg:path")
-          .attr("class", "cell")
-          .attr("d", function(d, i) { return "M" + polygons[i].join("L") + "Z"; })
-          .on("mouseover", function(d, i) { d3.select("h2 span").text(d.name); });
+		// Compute the Voronoi diagram of netDevices' projected positions.
+		polygons = d3.geom.voronoi(positions);
 
-      g.selectAll("path.arc")
-          .data(function(d) { return linksByOrigin[d.dpid] || []; })
-        .enter().append("svg:path")
-          .attr("class", "arc")
-          .attr("d", function(d) { return path(arc(d)); });
+		var g = cells.selectAll("g")
+			.data(netDevices)
+			.enter()
+			.append("svg:g");
 
-      circles.selectAll("circle")
-          .data(netDevices)
-        .enter().append("svg:circle")
-          .attr("cx", function(d, i) { return positions[i][0]; })
-          .attr("cy", function(d, i) { return positions[i][1]; })
-          .attr("r", function(d, i) { return countByDevice[d.dpid]*2; })
-  		  .style("fill", function(d,i) {
-  			if (netDevices[i].type == 1) {
-  				return "red";
-  			}
-  			return "blue";
-		  })
-          .sort(function(a, b) { return countByDevice[b.dpid] - countByDevice[a.dpid]; });
-    });
+		// Adding voronoi cells
+		g.append("svg:path")
+			.attr("class", "cell")
+			.attr("d", function(d, i) {	return "M" + polygons[i].join("L") + "Z"; })
+			.on("mouseover", function(d, i) {
+				var desc = d.name + " (" + d.dpid + ")\n"
+				var links = 'Links (port->node): '
+				linksByOrigin[d.dpid].forEach(function(l) {
+					links += l.sport + '->' + l.target + ','
+				});
+				d3.select("h2 span")
+					.text(desc + links);
+			});
+
+		// Draw links using the arc object defined before
+		g.selectAll("path.arc")
+			.data(function(d) {	return linksByOrigin[d.dpid] || [];	})
+			.enter()
+			.append("svg:path")
+			.attr("class", "arc")
+			.attr("d", function(d) { return path(arc(d)); });
+
+		// Draw circles
+		circles.selectAll("circle")
+			.data(netDevices).enter().append("svg:circle")
+			.attr("cx", function(d, i) { return positions[i][0]; })
+			.attr("cy", function(d, i) { return positions[i][1]; })
+			.attr("r", function(d, i) {	return countByDevice[d.dpid] * 2; })
+			.style("fill", function(d, i) {
+				if (netDevices[i].type == 1) {
+					return "red";
+				}
+				return "blue";
+			})
+			.sort(function(a, b) { return countByDevice[b.dpid] - countByDevice[a.dpid]; });
+
+		// Add labels
+		g.append("svg:text")
+			.attr("x", function(d, i) { return positions[i][0] + 5; })
+			.attr("y", function(d, i) {	return positions[i][1];	})
+			.attr("dy", ".2em")
+			.attr("class", "label")
+			.attr("id", function(d) { return 'netdev' + d.dpid; })
+			.text(function(d) { return d.dpid; });
+	});
 }
 
 function drawFloodlightCircuits() {
-	d3.text("data/circuits.json", function(txt) {
+	d3.text("/data/circuits.json", function(txt) {
 		var circuitLinks = jsonObjectListToArray(txt),
 			circuitIDs   = {},
 			previousHop  = '',
@@ -149,7 +187,7 @@ function drawFloodlightCircuits() {
 			var id    = circuitLink.name,
 				links = circuitLinksById[id] || (circuitLinksById[id] = []);
 				hop   = circuitLink.Dpid;
-
+			console.log("analysing circuit: " + id + ", hop: " + hop)
 			// Set ID
 			circuitLink.id = id;
 
@@ -169,6 +207,9 @@ function drawFloodlightCircuits() {
 					target: cleanDPID(hop),
 					color: circuitLink.color || ('#'+colorFromString(id))
 				});
+				console.log("new link for " + id + ", " +
+							"src:" + previousHop + " (" + cleanDPID(previousHop) + ") -> " + 
+							"dst:" + hop + " (" + cleanDPID(hop) + ")")
 			}
 			previousHop = hop
 		});
