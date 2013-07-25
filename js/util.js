@@ -13,7 +13,10 @@ function intToRGB(i){
 }
 
 function colorFromString(s) {
-	return intToRGB(hashCode(s));
+	var rgb = intToRGB(hashCode(s));
+	while (rgb.length < 6)
+		rgb = '0' + rgb
+	return rgb;
 }
 
 /**
