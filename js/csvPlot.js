@@ -31,7 +31,7 @@ d3.select("input[type=checkbox]").on("change", function() {
   cells.classed("voronoi", this.checked);
 });
 
-d3.json("us-states.json", function(collection) {
+d3.json("/data/us-states.json", function(collection) {
   states.selectAll("path")
       .data(collection.features)
     .enter().append("svg:path")
@@ -71,7 +71,7 @@ var arc = d3.geo.greatArc()
   });
 
 function drawTopology() {
-	d3.csv("data/switches.csv", function(netDevices) {
+	d3.csv("/data/switches.csv", function(netDevices) {
 
       // Only consider netDevices with at least one link.
       netDevices = netDevices.filter(function(netDevice) {
@@ -123,7 +123,7 @@ function drawTopology() {
 }
 
 function drawCircuits() {
-	d3.csv("data/circuits.csv", function(circuitLinks) {
+	d3.csv("/data/circuits.csv", function(circuitLinks) {
 
 		circuitLinks.forEach(function(circuitLink) {
 			var id = circuitLink.id,
@@ -159,7 +159,7 @@ function drawCircuits() {
 }
 
 function parseTopology() {
-	d3.csv("data/topology.csv", function(topology) {
+	d3.csv("/data/topology.csv", function(topology) {
 
 		topology.forEach(function(topologyLink) {
 			var origin = topologyLink.origin,
