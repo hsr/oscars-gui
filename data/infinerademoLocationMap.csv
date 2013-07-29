@@ -1,0 +1,8 @@
+dpid,type,name,city,state,country,latitude,longitude
+1,2,S1,Seattle,WA,USA,47,-122
+2,1,S2 Francisco,San Francisco,CA,USA,40,-118
+3,1,S3,Denver,CO,USA,32,-104
+4,2,S4,Dallas-Fort Worth,TX,USA,37,-101
+5,1,S5,Atlanta,GA,USA,32,-98
+6,1,S6,Chicago,IL,USA,41,-87
+7,2,S7,Orlando,FL,USA,48,-84

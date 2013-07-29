@@ -1,9 +1,10 @@
 function hashCode(str) { // java String#hashCode
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-       hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return hash;
+	var hash = 0;
+	    for (i = 0; i < str.length; i++) {
+	        char = str.charCodeAt(i);
+	        hash = char + (hash << 6) + (hash << 16) - hash;
+	    }
+	    return hash;
 } 
 
 function intToRGB(i){
@@ -16,6 +17,7 @@ function colorFromString(s) {
 	var rgb = intToRGB(hashCode(s));
 	while (rgb.length < 6)
 		rgb = '0' + rgb
+	console.log(rgb)
 	return rgb;
 }
 
