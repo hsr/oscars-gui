@@ -35,8 +35,8 @@ def get_mysql_conn(host="infinerademo.es.net", port=3306,
         sys.stderr.write('Could not connect to database: %s\n' % e.message)
     return None;
 
-def get_active_circuits():
-    conn = get_mysql_conn();
+def get_active_circuits(host, port):
+    conn = get_mysql_conn(host=host, port=port);
     if not conn:
         return None;
     
@@ -76,9 +76,12 @@ def get_active_circuits():
 def urn_split(urn):
     return [value.split('=')[1] for value in urn.split(':')[3:]]
     
-def update_active_circuits():
+def update_active_circuits(host='localhost:3306'):
+    host,port = (host,3306)
+    if len(host.split(':')) > 1:
+        host,port = host.split(':')
     
-    circuitsById = get_active_circuits();
+    circuitsById = get_active_circuits(host,port);
     if not circuitsById:
         sys.stderr.write('No circuits\n');
         return

@@ -5,8 +5,8 @@ import os
 
 err = ''
 
-def get_topology(controller):
-    command = "curl -s http://%s/wm/topology/links/json" % controller
+def get_topology(host, port):
+    command = "curl -s http://%s:%s/wm/topology/links/json" % (host,port)
     try:
         return os.popen(command).read()
     except Exception, e:
@@ -14,10 +14,14 @@ def get_topology(controller):
         return ''
     
     
-def update_topology(controller):
+def update_topology(host):
     global err;
     
-    floodlightTopology = get_topology(controller)
+    host,port = (host,8080)
+    if len(host.split(':')) > 1:
+        host,port = host.split(':')
+    
+    floodlightTopology = get_topology(host, port)
     if not len(floodlightTopology):
         sys.stderr.write('Could not get topology\n')
         err += 'Could not get topology. Are you sure your controller is running?\n'
